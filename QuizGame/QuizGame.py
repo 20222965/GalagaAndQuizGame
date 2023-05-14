@@ -4,20 +4,35 @@ import tkinter as tk
 import random
 import json
 from enum import IntFlag, auto
+import os
 
+currentDir = os.path.dirname(os.path.abspath(__file__))
+quizFolder = os.path.join(currentDir, "data/quiz")
+imageFolder = os.path.join(currentDir, "data/img")
 #퀴즈 타입을 구별하기 위한 enum클래스다. 같은 요소가 있는지 확인하려면 &, 추가하려면 | 연산을 하면 된다.
 # ex) QuizType.선다형을 찾기 위해선 if(a & QuizType.선다형)으로 하면 된다. 
 class QuizType(IntFlag):
     선다형 = auto()
     단답형 = auto()
-    힌트 = auto()
-    코드작성 = auto()
-    실행결과 = auto()
-    문법 = auto()
-    등등 = auto()
-    나중에쓸지모르는 = auto()
-    필터링용추가가능 = auto()
-    ALL = 선다형 | 단답형 | 힌트 | 코드작성 | 실행결과 | 문법 | 등등 | 나중에쓸지모르는 | 필터링용추가가능
+    Python = auto()
+
+    def ALL():
+        qtype = 0
+        for t in QuizType.__members__:
+            qtype  |= QuizType[t]
+        return qtype
+    
+    @classmethod
+    def addFlag(cls, name):
+        if name in cls.__members__:
+            return cls[name]
+
+        value = 1 << len(cls.__members__)
+        newFlag = cls(value)
+        newFlag._name_ = name
+        cls._member_names_.append(name)
+        cls._member_map_[name] = newFlag
+        return newFlag
 
 
 #퀴즈는 딕셔너리 형태로 퀴즈 리스트에 저장한다.
@@ -41,47 +56,16 @@ class QuizType(IntFlag):
 #"hint"는 현재는 사용하지 않지만 나중에 힌트가 있는 문제를 사용하면 문자열로 저장한다.
 
 #"option" 또는 "hint"가 필요 없는 문제라면 해당 부분을 None으로 해도 되고, 입력하지 않아도 된다.
-quizList = []
-quizList.append({"type" : QuizType.선다형 | QuizType.실행결과 , "level" : 2,
-                 "question" : "다음 프로그램의 실행 결과로 알맞은 것을 고르시오.",
-                "code" : """a = "abcdefgh"\nprint(a[0:6:2])""",
-                "answer" : "ace",
-                'option' : ['aceg', 'ace','ag', 'a','abcdefabcdef'],
-                'hint' : None})
-quizList.append({"type" : QuizType.선다형 | QuizType.문법 , "level" : 2,
-                 "question" : "다음 중 파이썬에 없는 기본 자료형을 고르시오.",
-                "code" : None,
-                "answer" : "unsigned int",
-                'option' : ['unsigned int', 'str', 'float', 'bool', 'list'],
-                'hint' : None})
-quizList.append({"type" : QuizType.단답형 | QuizType.실행결과 , "level" : 2,
-                 "question" : "다음 프로그램의 실행 결과를 쓰시오.",
-                "code" : """a = "pythonQuizProgram"
-print(a[8::-3])""",
-                "answer" : "int",
-                'option' : None,
-                'hint' : None})
-quizList.append({"type" : QuizType.단답형 | QuizType.실행결과 , "level" : 7,
-                 "question" : "다음 프로그램의 실행 결과를 쓰시오.",
-                "code" : """import numpy as np
-np_array = np.array([[1,2,3,4],
-                     [5,6,7,8],
-                     [9,10,11,12],
-                     [13,14,15,16]])
-print(np_array[::2][::2])""",
-                "answer" : "[[1 2 3 4]]",
-                'option' : None,
-                'hint' : None})
-
 
 #퀴즈 목록을 관리하는 클래스
 class Quiz:
     def __init__(self):             #C++의 생성자 역할을 한다.
         #퀴즈를 저장하는 리스트, 프로그램 안에서 작성한 전역 퀴즈 리스트를 랜덤 순서로 가져온다.
-        self.quiz = quizList
-        random.shuffle(self.quiz)
+        self.quiz = []
         self.usedQuiz = []          #self.quiz에서 사용된 퀴즈 또는 필터링으로 걸러진 퀴즈들이 보관된다.
         self.size = len(self.quiz)  #현재 퀴즈 크기를 갱신한다.
+        self.loadQuizzesFolder(quizFolder)
+        random.shuffle(self.quiz)
 
     #사용/필터링된 퀴즈를 모두 self.quiz로 다시 옮기는 함수
     def reset(self):
@@ -92,7 +76,7 @@ class Quiz:
     #퀴즈를 반환하는 함수
     def getNextQuiz(self, minLevel : int = 0, maxLevel : int = 255):
         if(self.size <= 0):
-            return -1
+            return None
         
         for quiz in self.quiz:
             #min, max는 난이도가 상승하는 형태가 필요할 때 사용가능.
@@ -103,23 +87,39 @@ class Quiz:
                 if(quiz['option']): #선다형일 경우 선택지 순서를 변경한다.
                     random.shuffle(quiz['option'])
                 return quiz         #조건에 맞는 퀴즈를 반환한다.        
+        return None
             
     #퀴즈 불러오는 함수 (현재 미사용)
+    def loadQuizzesFolder(self, folderPath):
+        jsonFiles = [f for f in os.listdir(folderPath) if f.endswith(".json")]
+        for file in jsonFiles:
+            filePath = os.path.join(folderPath, file)
+            try:
+                self.loadQuiz(filePath)
+            except Exception as e:
+                print(f"로드 실패한 파일 : {folderPath}, Error : {str(e)}")
+                continue
+
     def loadQuiz(self, file : str):                 #json 파일에서 퀴즈를 가져온다.
         with open(file, "r",encoding="utf-8") as f: #파일을 읽기로 인코딩은 utf-8으로 연다(한글)
             _load = json.load(f)                    #파일에 저장된 리스트를 가져온다.
         for q in _load:                     #리스트 순회(딕셔너리)
             quizTypeEnum = 0                #type 값 저장
-            for qt in QuizType.__members__: #문자열을 QuizType의 enum 형태로 변환한다.
-                if(qt in q["type"]):
-                    quizTypeEnum |= QuizType[qt]
+            loadType = q["type"][9:].split('|') #문자열을 IntFlag의 이름 단위로 분할
+            for lt in loadType:
+                if(lt not in QuizType.__members__): #QuizType에 해당 타입이 없으면
+                    QuizType.addFlag(lt)            #새로 추가
+                for qt in QuizType.__members__: #문자열을 QuizType의 enum 형태로 변환한다.
+                    if(qt in q["type"]):
+                        quizTypeEnum |= QuizType[qt]
+
             #딕셔너리를 퀴즈에 추가한다.
             self.addQuiz({"type" : quizTypeEnum , "level" :int(q["level"]),
             "question" : q["question"],             
-            "code" : q["code"],
+            "code" : q.get("code"),
             "answer" : q["answer"],
-            "option" : q["option"],
-            "hint" : q["hint"]})
+            "option" : q.get("option"),
+            "hint" : q.get("hint")})
         random.shuffle(self.quiz)   #퀴즈 순서를 랜덤으로 섞는다.
     
     #퀴즈 딕셔너리 추가 함수 (현재 미사용)
@@ -133,6 +133,7 @@ class Quiz:
         with open(file, "w",encoding="utf-8") as f: #json 파일을 저장하기 위해 utf-8으로 연다(한글)
             quiz = []                               #저장할 퀴즈
             for q in self.quiz + self.usedQuiz:     #현재 퀴즈 순환
+                q = dict[q]
                 q["type"] = str(q["type"])          #json에 enum 값을 문자열 형태로 저장한다.
                 quiz.append(q)                      #수정된 딕셔너리를 저장할 리스트에 추가한다.
             #print(quiz)
@@ -140,11 +141,12 @@ class Quiz:
 
     #퀴즈 필터링 함수   (현재 미사용)
     def filterQuiz(self, quizType : QuizType):
-        filter = [quiz for quiz in self.quiz if quiz["type"] & quizType]    #퀴즈에서 해당 타입이 있는 것을 저장한다.
-        for f in filter:
-            if f not in self.quiz:  #퀴즈에서 해당 타입이 없으면, quiz에서 usedQuiz로 옮긴다.
-                self.usedQuiz.append(f)
-                self.quiz.remove(f)
+        #퀴즈에서 해당 타입이 있는 것을 저장한다.
+        filter = [quiz for quiz in self.quiz if quiz["type"] & quizType]
+        #퀴즈에서 해당 타입이 없으면, quiz에서 usedQuiz로 옮긴다.
+        self.usedQuiz.extend([quiz for quiz in self.quiz if quiz not in filter])
+        #self.quiz에 해당 타입이 있는 퀴즈만 남긴다.
+        self.quiz = filter
 
 
 
@@ -192,15 +194,16 @@ class Game:
 
     #다음 문제를 가져오는 함수            
     def nextQuiz(self):
-        if(self.quiz.size <= 0):    #퀴즈가 남아있지 않으면
+        #다음 문제를 가져온다.
+        self.currentQuiz = self.quiz.getNextQuiz()
+        if(self.currentQuiz == None):#퀴즈가 남아있지 않으면
             #퀴즈를 초기화하고 결과화면으로 이동한다.
             self.quiz.reset()
             self.replacePage(self.resultPage)
             return
-        
-        #문제 번호를 더하고, 다음 문제를 가져온다.
+        #문제 번호를 더한다.
         self.quizNumber += 1
-        self.currentQuiz = self.quiz.getNextQuiz()
+        
         #퀴즈 화면 위젯을 갱신한다.
         self.currentPage.hide()
         self.currentPage.show()
@@ -225,7 +228,7 @@ class QuizPage(tk.Frame):
 
         #맨 위의 값을 표시한다. 문제 번호, 설명을 출력한다.
         self.question = tk.StringVar()
-        self.questionLabel = tk.Label(self.topFrame, textvariable=self.question, font=("", 30, "bold"), background='gray')
+        self.questionLabel = tk.Label(self.topFrame, textvariable=self.question, font=("", 20, "bold"), background='lightgray')
 
         #스크롤바, 문제가 길 경우 스크롤하여 볼 수 있다.
         self.scrollbar = tk.Scrollbar(self.topFrame)
