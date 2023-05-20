@@ -7,8 +7,9 @@ from enum import IntFlag, auto
 import os
 
 currentDir = os.path.dirname(os.path.abspath(__file__))
-quizFolder = os.path.join(currentDir, "data/quiz")
-imageFolder = os.path.join(currentDir, "data/img")
+quizFolder = os.path.join(currentDir, os.path.join("data","quiz"))
+imageFolder = os.path.join(currentDir, os.path.join("data", "img"))
+
 #퀴즈 타입을 구별하기 위한 enum클래스다. 같은 요소가 있는지 확인하려면 &, 추가하려면 | 연산을 하면 된다.
 # ex) QuizType.선다형을 찾기 위해선 if(a & QuizType.선다형)으로 하면 된다. 
 class QuizType(IntFlag):

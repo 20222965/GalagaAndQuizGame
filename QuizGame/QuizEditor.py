@@ -264,6 +264,7 @@ class MainPage(tk.Frame):
         #퀴즈 리스트 캔버스 초기화
         self.quizCanvas.delete("all")
         #각 퀴즈 순회
+        preTextLine = 0
         for i, quiz in enumerate(self.quizEditor.getQuizList()):
             #퀴즈 내용 설정
             text = "Level: " + str(quiz.get('level')) + "\n" + \
@@ -274,9 +275,12 @@ class MainPage(tk.Frame):
             "hint: " + str(quiz.get('hint')) + "\n" + \
             "code: " + str(quiz.get('code')) + '\n'
             #퀴즈 왼,상, 우,하 위치 설정
-            x1, y1 = 0, 0 + i * 120
-            x2, y2 = 100 + 900, 100 + (i + 1) * 120
-            
+            textLine = ( len(text.splitlines()) + 1 ) * 15
+
+            x1, y1 = 0, 0 + preTextLine
+            x2, y2 = 100 + 900, preTextLine + textLine
+            preTextLine = preTextLine + textLine
+
             #퀴즈 밑 사각형 생성
             self.quizCanvas.create_rectangle(x1, y1, x2, y2, outline="gray", fill="white",width=3, tags="quizRect" + str(i))
             #퀴즈 텍스트 생성
@@ -441,7 +445,7 @@ class QuizEditPopup(tk.Frame):
         elif(not(1 <= self.levelVar.get() <= 100)):
             self.showWarning("Level은 1부터 100 사이의 값이어야 합니다.")
             return
-        if(self.quiz["type"] & QuizType.선다형 and self.quiz["type"] & QuizType.단답형):
+        if(self.quiz["type"] & (QuizType.선다형 | QuizType.단답형) == (QuizType.선다형 | QuizType.단답형)):
             self.showWarning("선다형과 단답형을 동시에 선택할 수 없습니다.")
             return
         if( not(self.quiz["type"] & (QuizType.선다형 | QuizType.단답형)) ):
@@ -547,6 +551,7 @@ class QuizEditPopup(tk.Frame):
         self.show()
 
     def show(self):
+        self.bEdit = True
         self.place(x=150,y=50,width=1100,height=680)
         self.tab.select(0)
         self.tab.place(x=0,y=0,width=1100,height=680)
