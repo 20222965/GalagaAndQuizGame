@@ -47,7 +47,7 @@ class Enemy(GameObject):
         if(self.health <= 0):
             self.active = False
             #테스트용 print
-            print("Enemy Died")
+            print("Enemy Died", self)
             #gif 현재 위치에 재생
             gif_Died.addDied(self.getCenterPos())
     #이미지 갱신
