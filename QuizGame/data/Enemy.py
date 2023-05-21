@@ -4,8 +4,8 @@ from data.Pattern import *
 
 #적 클래스
 class Enemy(GameObject):
-    def __init__(self, sprite : SpriteInfo, patterns = Patterns.pattern01(), x = 0, y = 0, health = 10, attackTimer = 0.8, velocityX = 0, velocityY= 0, active = False):
-        super().__init__(sprite, x, y, velocityX, velocityY, active)
+    def __init__(self, sprite : SpriteInfo, patterns = Patterns.pattern01(), x = 0, y = 0, health = 10, attackTimer = 0.8, vectorX = 0, vectorY= 0, active = False):
+        super().__init__(sprite, x, y, vectorX, vectorY, active)
         #체력 설정
         self.health = health
         #몹 패턴 설정
@@ -20,6 +20,8 @@ class Enemy(GameObject):
         self.active = active
     #매 프레임 업데이트 함수
     def update(self):
+        super().update()
+        
         self.bullectManager.update()
         self.bullect2Manager.update()
         self.bullect3Manager.update()
@@ -71,5 +73,5 @@ class EnemyManager(ObjectManager):  #그냥 자동완성안되서 넣음. 그 �
         return super().getObject()
     
 
-enemy1 = Enemy(img_enemy1, Patterns.pattern01())
+enemy1 = Enemy(img_enemy1, Patterns.pattern01(), health=6)
 enemy2 = Enemy(img_enemy2, Patterns.pattern01(), health=3)

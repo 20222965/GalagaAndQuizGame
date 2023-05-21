@@ -96,9 +96,9 @@ class Stage1(Stage):
             self.enemy2Manager.getObject().setCenterPos(720+i*60,300 + i * 40).setPatterns([M_Normal(mirror=True), A_Guided()])
             for j in range(2):
                 if(j & 1 == 0):
-                    self.enemy1Manager.getObject().setCenterPos(20 + i * 40,100 + i * 40).setVelocity(10,0).setPatterns(Patterns.pattern01())
+                    self.enemy1Manager.getObject().setCenterPos(20 + i * 40,100 + i * 40).setVector(10,0).setPatterns(Patterns.pattern01())
                 else:
-                    self.enemy1Manager.getObject().setCenterPos(800 - i * 40,100 + i * 40).setVelocity(10,0).setPatterns(Patterns.pattern01(mirror=True))
+                    self.enemy1Manager.getObject().setCenterPos(800 - i * 40,100 + i * 40).setVector(10,0).setPatterns(Patterns.pattern01(mirror=True))
                     await asyncio.sleep(1)    #1초 딜레이
                     
         self.isSpawned = True   #생성 종료

@@ -52,7 +52,9 @@ class PatternManager:
         self.patternQueue.append(pattern)
         return self
     #패턴 설정
-    def setPattern(self, patterns : Iterable):
+    def setPattern(self, patterns):
+        if not isinstance(patterns, Iterable):
+            patterns = [patterns]
         #패턴 소유자 설정 및 패턴 추가
         self.patternQueue = deque([pattern.setEnemy(self.enemy) for pattern in patterns])
         return self
@@ -108,7 +110,7 @@ class A_Normal(Pattern):
         super().update()
         #
         if Timer.getDeltaTime(self.patternStartTime) >= self.enemy.attackTimer:
-            self.enemy.bullect3Manager.getObject().setVelocity(0,10).setCenterPos((self.enemy.getCenterPos()))
+            self.enemy.bullect3Manager.getObject().setVector(0,10).setCenterPos((self.enemy.getCenterPos()))
             self.patternStartTime = Timer.getElapsedTime()
             self.isFinished = True
 
@@ -130,7 +132,7 @@ class A_Guided(Pattern):
             #Bullet 속도 설정
             vector = unitVector * 5
             #불릿 생성 및 속도, 위치 설정
-            self.enemy.bullectManager.getObject().setVelocity(vector).setCenterPos((self.enemy.getCenterPos()))
+            self.enemy.bullectManager.getObject().setVector(vector).setCenterPos((self.enemy.getCenterPos()))
             self.patternStartTime = Timer.getElapsedTime()
             #패턴 종료
             self.isFinished = True        
@@ -145,9 +147,9 @@ class M_Normal(Pattern):
     def init(self):
         self.moveFrame = 30
         super().init()
-        self.enemy.setVelocity(7,0)
+        self.enemy.setVector(7,0)
         if(self.mirror == True):
-            self.enemy.velocity[0] *= -1
+            self.enemy.vector[0] *= -1
                     
     def update(self):
         super().update()
@@ -171,9 +173,9 @@ class M_WidthLoop(Pattern):
         super().init()
         
         self.moveFrame = 20
-        self.enemy.setVelocity(5,0)
+        self.enemy.setVector(5,0)
         if(self.mirror == True):
-            self.enemy.velocity[0] *= -1
+            self.enemy.vector[0] *= -1
             
     def update(self):
         super().update()

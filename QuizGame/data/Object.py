@@ -6,17 +6,17 @@ from .SpriteInfo import *
 
 #게임 오브젝트
 class GameObject(ABC):
-    def __init__(self, sprite : SpriteInfo, x, y, velocityX, velocityY, active = False):
+    def __init__(self, sprite : SpriteInfo, x, y, vectorX, vectorY, active = False):
         self.sprite = sprite
         self.sprite.setPos(x, y)
-        self.velocity = [velocityX, velocityY]
+        self.vector = [vectorX, vectorY]
         self.active = active
 
     #속도 설정
-    def setVelocity(self, velocityX, velocityY = None):
-        if(velocityY is None):
-            velocityX, velocityY = velocityX
-        self.velocity = [velocityX, velocityY]
+    def setVector(self, vectorX, vectorY = None):
+        if(vectorY is None):
+            vectorX, vectorY = vectorX
+        self.vector = [vectorX, vectorY]
         
         return self
     
@@ -35,7 +35,7 @@ class GameObject(ABC):
     
     #현재 X, Y 속도로 움직임
     def move(self):
-        self.sprite.addPos(self.velocity)
+        self.sprite.addPos(self.vector)
 
     #개체 갱신
     @abstractmethod
@@ -129,6 +129,7 @@ class ObjectManager:
             obj.update()
             if obj.active == False:     #만약 비활성 상태로 된 개체가 있으면
                 self.releaseObject(obj) #비활성 개체 리스트에 저장
+                return
 
     #개체 충돌 판정 확인
     def physics(self, otherObjectList):
