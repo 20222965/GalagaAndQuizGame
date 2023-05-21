@@ -41,7 +41,7 @@ class Enemy(GameObject):
 
     #충돌 했을 때
     def hit(self):
-        print("Enemy Hit!!")
+        print("Enemy Hit!", self)
         self.health -= 1
         #체력이 없으면, 비활성 상태로 변환
         if(self.health <= 0):
