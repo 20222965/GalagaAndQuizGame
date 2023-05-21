@@ -1,7 +1,7 @@
 from .Object import *
 from .Bullet import *
 from data.Pattern import *
-
+#github 테스트용
 #적 클래스
 class Enemy(GameObject):
     def __init__(self, sprite : SpriteInfo, patterns = Patterns.pattern01(), x = 0, y = 0, health = 10, attackTimer = 0.8, vectorX = 0, vectorY= 0, active = False):
