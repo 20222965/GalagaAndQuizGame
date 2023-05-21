@@ -48,7 +48,7 @@ class Player(GameObject):
     def attack(self):
         self.bullectManager.getObject().setVector(0,-20).setCenterPos(self.getCenterPos())
 
-    def physics(self, otherObjectList : list[GameObject]):
+    def physics(self, otherObjectList):
         for otherObject in otherObjectList:
             if(isinstance(otherObject, Bullet)):    #불릿일 경우에만 피격 판정 확인
                 if self.sprite.mask.overlap(otherObject.sprite.mask, (otherObject.sprite.x -self.sprite.x , otherObject.sprite.y - self.sprite.y)):
