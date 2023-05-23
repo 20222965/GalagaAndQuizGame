@@ -1,10 +1,10 @@
 from .Object import *
 from .Bullet import *
 from data.Pattern import *
-#github 테스트용
+
 #적 클래스
 class Enemy(GameObject):
-    def __init__(self, sprite : SpriteInfo, patterns = Patterns.pattern01(), x = 0, y = 0, health = 10, attackTimer = 0.8, vectorX = 0, vectorY= 0, active = False):
+    def __init__(self, sprite : SpriteInfo, patterns = Patterns.pattern01(), x = -500, y = -500, health = 10, attackTimer = 0.8, vectorX = 0, vectorY= 0, active = False):
         super().__init__(sprite, x, y, vectorX, vectorY, active)
         #체력 설정
         self.health = health
@@ -19,20 +19,21 @@ class Enemy(GameObject):
         self.bullect3Manager = ObjectManager(bullet3, 5)
         self.active = active
     #매 프레임 업데이트 함수
-    def update(self):
-        super().update()
+    def update(self, deltaTime):
+        """자신과 소유한 불릿을 vector 만큼 이동, 패턴이 있을 경우 패턴 실행"""
+        super().update(deltaTime)
         
-        self.bullectManager.update()
-        self.bullect2Manager.update()
-        self.bullect3Manager.update()
+        self.bullectManager.update(deltaTime)
+        self.bullect2Manager.update(deltaTime)
+        self.bullect3Manager.update(deltaTime)
 
         if self.patternManager is not None:
-            self.patternManager.update()
+            self.patternManager.update(deltaTime)
     #충돌 확인 함수
     def physics(self, otherObjectList):
         for otherObject in otherObjectList:
             if(isinstance(otherObject, Bullet)):    #bullet일 경우만 피격 판정 확인
-                if self.sprite.mask.overlap(otherObject.sprite.mask, (otherObject.sprite.x -self.sprite.x , otherObject.sprite.y - self.sprite.y)):
+                if self.sprite.overlap(otherObject.sprite):
                     self.hit()
                     otherObject.hit()
                     break
@@ -50,6 +51,7 @@ class Enemy(GameObject):
             print("Enemy Died", self)
             #gif 현재 위치에 재생
             gif_Died.addDied(self.getCenterPos())
+            
     #이미지 갱신
     def render(self, screen):
         super().render(screen)

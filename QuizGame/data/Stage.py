@@ -24,7 +24,7 @@ class Stage(ABC):
         pass
     #매 프레임 스테이지 갱신    
     @abstractmethod
-    def update(self):
+    def update(self, deltaTime):
         #나중에 이곳에 플레이어가 죽었을 경우 패배를 넣을 수 있음.
         pass
     #스테이지 이미지 갱신
@@ -51,7 +51,7 @@ class StageManager:
         self.currentStage.start()
 
     #매 프레임 스테이지 갱신
-    def update(self):
+    def update(self, deltaTime):
         #현재 스테이지 끝나면, 다음 스테이지 가져옴.
         if(self.currentStage.isFinished == True):
             if(self.stages):
@@ -62,7 +62,7 @@ class StageManager:
                 
         #현재 스테이지 갱신    
         if self.currentStage:
-            self.currentStage.update()
+            self.currentStage.update(deltaTime)
     
     #스테이지 충돌판정   
     def physics(self):
@@ -96,19 +96,19 @@ class Stage1(Stage):
             self.enemy2Manager.getObject().setCenterPos(720+i*60,300 + i * 40).setPatterns([M_Normal(mirror=True), A_Guided()])
             for j in range(2):
                 if(j & 1 == 0):
-                    self.enemy1Manager.getObject().setCenterPos(20 + i * 40,100 + i * 40).setVector(10,0).setPatterns(Patterns.pattern01())
+                    self.enemy1Manager.getObject().setCenterPos(20 + i * 40,100 + i * 40).setPatterns(Patterns.pattern01())
                 else:
-                    self.enemy1Manager.getObject().setCenterPos(800 - i * 40,100 + i * 40).setVector(10,0).setPatterns(Patterns.pattern01(mirror=True))
+                    self.enemy1Manager.getObject().setCenterPos(800 - i * 40,100 + i * 40).setPatterns(Patterns.pattern01(mirror=True))
                     await asyncio.sleep(1)    #1초 딜레이
                     
         self.isSpawned = True   #생성 종료
                     
     #매 프레임, player와 enemy들 갱신            
-    def update(self):
-        super().update()
-        self.player.update()
-        self.enemy1Manager.update()
-        self.enemy2Manager.update()
+    def update(self, deltaTime):
+        super().update(deltaTime)
+        self.player.update(deltaTime)
+        self.enemy1Manager.update(deltaTime)
+        self.enemy2Manager.update(deltaTime)
         
         #만약, 스폰이 끝났고, 활동중인 몹이 없으면, 게임 클리어
         if(self.isSpawned == True and not self.enemy1Manager.activeObjects and not self.enemy2Manager.activeObjects):

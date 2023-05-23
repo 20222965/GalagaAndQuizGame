@@ -6,11 +6,16 @@ from .SpriteInfo import *
 
 #게임 오브젝트
 class GameObject(ABC):
-    def __init__(self, sprite : SpriteInfo, x, y, vectorX, vectorY, active = False):
+    def __init__(self, sprite : SpriteInfo, x = -500, y = -500, vectorX = 0, vectorY = 0, active = False):
         self.sprite = sprite
+        """이미지 관련 정보 저장"""
         self.sprite.setPos(x, y)
         self.vector = [vectorX, vectorY]
+        """vector : 개체의 초당 x,y 속도, update()에서 자동 이동함"""
+        self.acceleration = 0
+        """초당 accel만큼 vector의 크기 증가"""
         self.active = active
+        """활성 상태 확인 (bool)"""
 
     #속도 설정
     def setVector(self, vectorX, vectorY = None):
@@ -20,8 +25,26 @@ class GameObject(ABC):
         
         return self
     
+    def setAngleSpeed(self, angle, speed):
+        """반시계 +방향, 상단 0, 좌측 90, 하단 180, 우측 -90"""
+        #preAngle = self.angle
+        self.angle = angle
+        self.speed = speed
+        angleRadian = math.radians(self.angle)
+        self.vector[0] = -math.sin(angleRadian) * speed
+        self.vector[1] = -math.cos(angleRadian) * speed
+        return self
+        #
+    
+    def setAccel(self, acceleration):
+        """가속도 크기 설정, 1초에 acceleration만큼 vector 크기 증가"""
+        self.acceleration = acceleration
+        return self
+    
     #중심 좌표로 개체 위치 설정
     def setCenterPos(self, x, y = None):
+        """중심 좌표로 개체 위치 설정\n
+        입력값 중심 좌표"""
         if(y is None):
             x, y = x
         #이미지는 좌상단 좌표를 쓰기 때문에 변환해서 설정
@@ -30,17 +53,25 @@ class GameObject(ABC):
         return self
     #중심 좌표 반환    
     def getCenterPos(self):
+        """이미지의 중심 좌표 반환"""
         #이미지는 좌상단 좌표를 쓰기 때문에 변환해서 반환
         return self._toCenterXY(self.sprite.getPos())
     
-    #현재 X, Y 속도로 움직임
-    def move(self):
-        self.sprite.addPos(self.vector)
 
     #개체 갱신
     @abstractmethod
-    def update(self):
-        pass
+    def update(self, deltaTime):
+        """현재 vector 만큼 움직임\n
+        이후 가속도 크기만큼 vector 크기 증가"""
+        #vector 이동
+        self.sprite.addPos(self.vector[0] * deltaTime, self.vector[1] * deltaTime)
+        
+        #가속도 만큼 vector 크기 증가
+        if(self.acceleration):
+            v = np.array(self.vector)
+            n = np.linalg.norm(v)
+            if(n):
+                self.vector = list(v + v / n * self.acceleration * deltaTime)
     
     #개체 충돌했을 때 호출
     @abstractmethod
@@ -48,14 +79,16 @@ class GameObject(ABC):
         pass
     #개체 이미지 갱신    
     def render(self, screen):
+        """개체 이미지 업데이트"""
         self.sprite.render(screen)
 
     #개체가 완전히 밖으로 나가면 True 반환
-    def isOutsideScreen(self, addX = [0, 0], addY : int = None, screenWidth=gameSetting["width"], screenHeight=gameSetting["height"]):
-        if(addY is None):
-            addX, addY = addX
-        x = self.sprite.x + addX
-        y = self.sprite.y + addY
+    def isOutsideScreen(self, deltaTime = 0, screenWidth=gameSetting["width"], screenHeight=gameSetting["height"]):
+        """개체가 완전히 밖으로 나가면 True 반환\n
+        deltaTime : 이 시간만큼 vector 이동 후 위치에서 계산"""
+        x, y = self.sprite.getPos()
+        x += self.vector[0] * deltaTime
+        y += self.vector[1] * deltaTime
 
         if x + self.sprite.image.get_width() < 0 or x > screenWidth:
             return True
@@ -63,12 +96,15 @@ class GameObject(ABC):
             return True
         return False
     #개체가 완전히 안에 있으면 True 반환        
-    def isInsideScreen(self, addX : int = 0, addY : int = 0, screenWidth=gameSetting["width"], screenHeight=gameSetting["height"]):
-        x = self.sprite.x + addX
-        y = self.sprite.y + addY
+    def isInsideScreen(self, deltaTime = 0, screenWidth = gameSetting["width"], screenHeight = gameSetting["height"]):
+        """개체가 완전히 안에 있으면 True 반환\n
+        deltaTime : 이 시간만큼 vector 이동 후 위치에서 계산"""
+        x, y = self.sprite.getPos()
+        x += self.vector[0] * deltaTime
+        y += self.vector[1] * deltaTime
 
-        if x + addX > 0 and x + self.sprite.image.get_width() + addX < screenWidth:
-            if y + addY > 0 and y + self.sprite.image.get_height() + addY < screenHeight:
+        if x > 0 and x + self.sprite.image.get_width() < screenWidth:
+            if y > 0 and y + self.sprite.image.get_height() < screenHeight:
                 return True
         return False
     
@@ -119,17 +155,17 @@ class ObjectManager:
             self.activeObjects.remove(obj)
             self.inactiveObjects.append(obj)
             
-    #개체 리스트 반환 (physics에서 사용)
+    #활성 개체 리스트 반환 (physics에서 사용)
     def getObjectList(self):
-        return [obj for obj in self.activeObjects]
+        return self.activeObjects
     
     #개체 매 프레임 갱신
-    def update(self):
+    def update(self, deltaTime):
         for obj in self.activeObjects:  #활성 개체 순환하여 갱신
-            obj.update()
             if obj.active == False:     #만약 비활성 상태로 된 개체가 있으면
                 self.releaseObject(obj) #비활성 개체 리스트에 저장
-                return
+            else:
+                obj.update(deltaTime)
 
     #개체 충돌 판정 확인
     def physics(self, otherObjectList):
@@ -139,3 +175,21 @@ class ObjectManager:
     def render(self, screen):
         for obj in self.activeObjects:
             obj.render(screen)
+            
+            
+    def resize(self, newSize):
+        currentSize = len(self.inactiveObjects) + len(self.activeObjects)
+        if newSize <= 0:
+            self.inactiveObjects = []
+        elif newSize > currentSize:
+            newObjects = [copy.deepcopy(self.object) for i in range(newSize - currentSize)]
+            self.inactiveObjects.extend(newObjects)
+        elif newSize < currentSize:
+            cnt = currentSize - newSize
+            for i in range(self.inactiveObjects):
+                if(cnt >= 1):
+                    self.inactiveObjects.pop()
+                    cnt -= 1
+        
+        return self
+

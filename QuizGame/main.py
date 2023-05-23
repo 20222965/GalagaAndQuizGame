@@ -9,15 +9,26 @@ from data.Stage import *
 #게임루프
 class GameLoop:
     def __init__(self):
+        #타이머 시작
         Timer.start()
+        self.preFrameTime = Timer.getElapsedTime()
+        """이전 프레임 시간 저장"""
+        
         self.player = player    #Player.py에서 생성한 player 객체 가져옴 선언된 위치 확인하려면 그 이름 누르고 F12 누르면 됩니다.
         self.screen = screen    #GameSetting에서 pygame 시작 후 screen 생성한 것을 가져옴.
         self.clock = clock      #프레임, 게임 루프할 때 사용
-        self.stageManager = StageManager()
+        
+        self.stageManager = StageManager()  #스테이지 관리
+        
         
     async def gameLoop(self):
         self.stageManager.start()
         while True:
+            #현재 프레임과 이전 프레임의 시간 차
+            deltaTime = Timer.getDeltaTime(self.preFrameTime)
+            
+            self.preFrameTime = Timer.getElapsedTime()  #이전 프레임 시간 저장
+            
             #입력
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -51,7 +62,7 @@ class GameLoop:
             #화면 초기화.
             self.screen.fill((0,0,0))
 
-            self.stageManager.update()
+            self.stageManager.update(deltaTime)
             
             self.stageManager.physics()
             

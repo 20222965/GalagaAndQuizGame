@@ -10,36 +10,38 @@ class SpriteInfo:
         self.image = image
         #충돌 판정에 씀
         self.mask = pygame.mask.from_surface(image)
-        self.x = x #좌측 좌표
-        self.y = y #상단 좌표
+        self.position = [x, y] #좌, 상단 좌표
     
     #이미지 위치 설정
     def setPos(self, x, y = None):
         if(y is None):
             x, y = x
-        self.x, self.y = x, y
+        self.position[0] = x
+        self.position[1] = y
     #이미지 위치 이동
     def addPos(self, x, y = None):
         if(y is None):
             x, y = x
-        self.x = self.x + x
-        self.y = self.y + y
+        self.position[0] += x
+        self.position[1] += y
 
     #좌상단 좌표를 반환한다
     def getPos(self):
-        return (self.x, self.y)
+        return self.position[:]
     
     #두 개체 충돌 확인
-    def overlap(self, otherObject):
-        return self.mask.overlap(otherObject.mask, otherObject.getPos())
+    def overlap(self, otherSprite : 'SpriteInfo'):
+        x, y = self.getPos()
+        otherX, otherY = otherSprite.getPos()
+        return self.mask.overlap(otherSprite.mask, (otherX - x , otherY - y))
     
     #이미지 화면에 그림
     def render(self, screen : pygame.Surface):
-        screen.blit(self.image, (self.x,self.y))
+            screen.blit(self.image, tuple(self.position))
 
     #개체 복사용 설정
     def __deepcopy__(self, memo):
-        newSprite = SpriteInfo(self.image, self.x, self.y)
+        newSprite = SpriteInfo(self.image, self.position[0], self.position[1])
         return newSprite
 
 #이미지 생성

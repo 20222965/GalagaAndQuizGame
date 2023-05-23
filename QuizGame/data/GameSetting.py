@@ -1,9 +1,11 @@
 import os
 import pygame
+import numpy as np
+import math
 
 gameSetting = {'width' : 800,
             'height' : 1000,
-            'fps' : 60}
+            'fps' : 240}
 
 currentDir = os.path.dirname(os.path.abspath(__file__))
 quizFolder = os.path.join(currentDir, "quiz")
