@@ -13,22 +13,25 @@ class Enemy(GameObject):
         self.patternManager.setPattern(patterns)
         #공격 쿨타임
         self.attackTimer = attackTimer
-        #불릿들 미리 생성
-        self.bullectManager = ObjectManager(bullet1, 5)
-        self.bullect2Manager = ObjectManager(bullet2, 5)
-        self.bullect3Manager = ObjectManager(bullet3, 5)
+        #불릿들 관리
+        self.bulletManager = BulletManager(bullet1, 5)
+        self.bullet2Manager = BulletManager(bullet2, 5)
+        self.bullet3Manager = BulletManager(bullet3, 5)
+        self.bulletManagers = [self.bulletManager , self.bullet2Manager, self.bullet3Manager]
+        
         self.active = active
+        
     #매 프레임 업데이트 함수
     def update(self, deltaTime):
         """자신과 소유한 불릿을 vector 만큼 이동, 패턴이 있을 경우 패턴 실행"""
         super().update(deltaTime)
         
-        self.bullectManager.update(deltaTime)
-        self.bullect2Manager.update(deltaTime)
-        self.bullect3Manager.update(deltaTime)
+        for bulletManager in self.bulletManagers:
+           bulletManager.update(deltaTime)
 
         if self.patternManager is not None:
             self.patternManager.update(deltaTime)
+            
     #충돌 확인 함수
     def physics(self, otherObjectList):
         for otherObject in otherObjectList:
@@ -38,7 +41,10 @@ class Enemy(GameObject):
                     otherObject.hit()
                     break
             else:   #플레이어의 충돌판정에 불릿과 자신을 넘김.
-                otherObject.physics(self.bullectManager.getObjectList() + self.bullect2Manager.getObjectList() + self.bullect3Manager.getObjectList() + [self])
+                bullets = []
+                for bulletManager in self.bulletManagers:
+                    bullets += bulletManager.getObjectList()
+                otherObject.physics(bullets + [self])
 
     #충돌 했을 때
     def hit(self):
@@ -55,9 +61,8 @@ class Enemy(GameObject):
     #이미지 갱신
     def render(self, screen):
         super().render(screen)
-        self.bullectManager.render(screen)
-        self.bullect2Manager.render(screen)
-        self.bullect3Manager.render(screen)
+        for bulletManager in self.bulletManagers:
+           bulletManager.render(screen)
 
     #패턴 설정
     def setPatterns(self, patterns):
@@ -67,7 +72,10 @@ class Enemy(GameObject):
     def addPatterns(self, pattern):
         self.patternManager.addPattern(pattern)
         return self
-
+    #attackTimer 변경
+    def setAttackTimer(self, attackTimer):
+        self.attackTimer = attackTimer
+        
 class EnemyManager(ObjectManager):  #그냥 자동완성안되서 넣음. 그 외 ObjectManager와는 현재 차이 없음.
     def __init__(self, gameEnemyInstance: Enemy, size: int = 10) -> None:
         super().__init__(gameEnemyInstance, size)
@@ -75,5 +83,5 @@ class EnemyManager(ObjectManager):  #그냥 자동완성안되서 넣음. 그 �
         return super().getObject()
     
 
-enemy1 = Enemy(img_enemy1, Patterns.pattern01(), health=6)
-enemy2 = Enemy(img_enemy2, Patterns.pattern01(), health=3)
+enemy1 = Enemy(img_enemys[0], Patterns.pattern01(), health=6)
+enemy2 = Enemy(img_enemys[1], Patterns.pattern01(), health=3)

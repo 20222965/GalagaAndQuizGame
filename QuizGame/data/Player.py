@@ -24,25 +24,18 @@ class Player(GameObject):
             self.hitCooltime -= deltaTime
 
         #이동 키입력
-        if(pygame.K_LEFT in self.keylist):
-           self.vector[0] -= 350
-        if(pygame.K_RIGHT in self.keylist):
-           self.vector[0] += 350
-        if(pygame.K_DOWN in self.keylist):
-           self.vector[1] += 350
-        if(pygame.K_UP in self.keylist):
-           self.vector[1] -= 350
+        self.vector[0] += 350 * ((pygame.K_RIGHT in self.keylist) - (pygame.K_LEFT in self.keylist))
+        self.vector[1] += 350 * ((pygame.K_DOWN in self.keylist) - (pygame.K_UP in self.keylist))
         if(pygame.K_SPACE in self.keylist):
-            
             #공격 쿨타임 끝나면
             if(self.attackCooltime <= 0):
                 self.attackCooltime = self.attackCooltimeValue
                 self.attack()   #공격
-                
+
         #화면 밖에 나갈 경우 이동 안 함
-        if(not self.isInsideScreen(deltaTime)):
+        if(not self.isInsideScreen(deltaTime, (0,self.vector[1]))):
             self.vector[1] = 0
-        if(not self.isInsideScreen(deltaTime)):
+        if(not self.isInsideScreen(deltaTime, (self.vector[0], 0))):
             self.vector[0] = 0
         
         #현재 속도만큼 이동

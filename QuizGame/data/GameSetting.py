@@ -5,7 +5,7 @@ import math
 
 gameSetting = {'width' : 800,
             'height' : 1000,
-            'fps' : 240}
+            'fps' : 144}
 
 currentDir = os.path.dirname(os.path.abspath(__file__))
 quizFolder = os.path.join(currentDir, "quiz")

@@ -1,4 +1,5 @@
 import pygame
+import glob
 import os
 from .Timer import *
 from .GameSetting import *
@@ -47,19 +48,13 @@ class SpriteInfo:
 #이미지 생성
 img_player = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"player.png")).convert_alpha())
 
-img_enemy1 = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"enemy1.png")).convert_alpha())
-img_enemy2 = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"enemy2.png")).convert_alpha())
 
 
-img_bullet1 = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"bullet.png")).convert_alpha())
-img_bullet2 = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"bullet2.png")).convert_alpha())
-img_bullet3 = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"bullet3.png")).convert_alpha())
+img_enemys = glob.glob(os.path.join(imageFolder, "enemy*.png"))
+img_enemys = [SpriteInfo(pygame.image.load(img_enemy).convert_alpha()) for img_enemy in img_enemys]
 
-
-
-
-
-
+img_bullets = glob.glob(os.path.join(imageFolder, "bullet*.png"))
+img_bullets = [SpriteInfo(pygame.image.load(img_bullet).convert_alpha()) for img_bullet in img_bullets]
 
 
 #gif 재생 부분

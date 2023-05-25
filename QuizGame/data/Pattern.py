@@ -7,7 +7,9 @@ from .Timer import *
 
 from typing import TYPE_CHECKING
 from .Player import player
+from .Bullet import *
 if TYPE_CHECKING:
+    from .SpriteInfo import *
     from .Enemy import Enemy
 
 
@@ -20,6 +22,8 @@ class Pattern(ABC):
         
         self.isFinished = False
         self.isLoop = False
+        
+        self.idx = -1
         
     #패턴 소유자 설정
     def setEnemy(self, enemy : 'Enemy'):
@@ -72,7 +76,8 @@ class PatternManager:
         if self.currentPattern is None:
             #패턴을 가져오고 초기화
             self.currentPattern = self.getNextPattern()
-            self.currentPattern.init()
+            if(self.currentPattern):
+                self.currentPattern.init()
 
         #현재 패턴이 있으면 업데이트
         if self.currentPattern is not None:
@@ -86,7 +91,8 @@ class PatternManager:
                     self.patternQueue.append(self.currentPattern)
                 #다음 패턴을 가져오고 초기화
                 self.currentPattern = self.getNextPattern()
-                self.currentPattern.init()
+                if(self.currentPattern):
+                    self.currentPattern.init()
                 
                 
 #그냥 패턴들 저장하는 리스트, 적 개체에 패턴을 직접 리스트로 넣어도 별 상관 없음    
@@ -113,7 +119,7 @@ class A_Normal(Pattern):
         
         if Timer.getDeltaTime(self.patternStartTime) >= self.enemy.attackTimer:
             #불릿 생성 및 속도, 위치 설정
-            self.enemy.bullect3Manager.getObject().setVector(0,700).setCenterPos((self.enemy.getCenterPos()))
+            self.enemy.bullet3Manager.getObject().setVector(0,700).setCenterPos((self.enemy.getCenterPos()))
             self.patternStartTime = Timer.getElapsedTime()
             #패턴 종료
             self.isFinished = True
@@ -136,11 +142,11 @@ class A_Guided(Pattern):
             #Bullet 속도 설정
             vector = unitVector * 100
             #불릿 생성 및 속도, 위치 설정
-            self.enemy.bullectManager.getObject().setVector(vector).setAccel(500).setCenterPos((self.enemy.getCenterPos()))
+            self.enemy.bulletManager.getObject().setVector(vector).setAccel(500).setCenterPos((self.enemy.getCenterPos()))
             self.patternStartTime = Timer.getElapsedTime()
             #패턴 종료
             self.isFinished = True        
-               
+                              
 #MovePattern
 #단순히 좌->우 일자로 이동하는 패턴
 class M_Normal(Pattern):

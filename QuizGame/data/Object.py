@@ -14,6 +14,8 @@ class GameObject(ABC):
         """vector : 개체의 초당 x,y 속도, update()에서 자동 이동함"""
         self.acceleration = 0
         """초당 accel만큼 vector의 크기 증가"""
+        self.angle = 0
+        """이동 각도 설정"""
         self.active = active
         """활성 상태 확인 (bool)"""
 
@@ -22,7 +24,7 @@ class GameObject(ABC):
         if(vectorY is None):
             vectorX, vectorY = vectorX
         self.vector = [vectorX, vectorY]
-        
+        self.angle = math.degrees(math.atan2(-self.vector[0], -self.vector[1]))
         return self
     
     def setAngleSpeed(self, angle, speed):
@@ -96,12 +98,12 @@ class GameObject(ABC):
             return True
         return False
     #개체가 완전히 안에 있으면 True 반환        
-    def isInsideScreen(self, deltaTime = 0, screenWidth = gameSetting["width"], screenHeight = gameSetting["height"]):
+    def isInsideScreen(self, deltaTime = 0, vector : tuple = (0, 0), screenWidth = gameSetting["width"], screenHeight = gameSetting["height"]):
         """개체가 완전히 안에 있으면 True 반환\n
         deltaTime : 이 시간만큼 vector 이동 후 위치에서 계산"""
         x, y = self.sprite.getPos()
-        x += self.vector[0] * deltaTime
-        y += self.vector[1] * deltaTime
+        x += vector[0] * deltaTime
+        y += vector[1] * deltaTime
 
         if x > 0 and x + self.sprite.image.get_width() < screenWidth:
             if y > 0 and y + self.sprite.image.get_height() < screenHeight:
@@ -126,6 +128,8 @@ class GameObject(ABC):
  #개체 관리 (생성 및 반환, 활동중인 개체 업데이트, 충돌판정, 렌더링)   
 class ObjectManager:
     def __init__(self, gameObjectInstance : GameObject, size : int = 10) -> None:
+        self.size = size
+        
         self.object = gameObjectInstance    #개체 종류 저장
         self.activeObjects = [self.object]  #활동중인 개체, 지금 값은 의미 없는 자동완성용, 다시 []로 초기화.
         self.activeObjects = []
@@ -143,12 +147,13 @@ class ObjectManager:
         else:
             # 개체에 비활성 개체가 없는 경우, 새로운 개체 생성
             obj = copy.deepcopy(self.object)
+            self.size += 1
             obj.active = True   #활성 상태로 만들고   
             self.activeObjects.append(obj)
             return obj  #개체 반환
     
     #비활성 개체 리스트로 옮기는 함수    
-    def releaseObject(self, obj):
+    def releaseObject(self, obj : GameObject):
         if obj in self.activeObjects:   #입력받은 개체가 활성 개체 리스트에 있으면
             # 활성 개체를 비활성 상태로 변경
             obj.active = False
@@ -178,18 +183,22 @@ class ObjectManager:
             
             
     def resize(self, newSize):
-        currentSize = len(self.inactiveObjects) + len(self.activeObjects)
+        currentSize = self.size
         if newSize <= 0:
             self.inactiveObjects = []
+            self.size = len(self.activeObjects)
         elif newSize > currentSize:
-            newObjects = [copy.deepcopy(self.object) for i in range(newSize - currentSize)]
+            size = newSize - self.size
+            newObjects = [copy.deepcopy(self.object) for i in range(size)]
             self.inactiveObjects.extend(newObjects)
+            self.size = newSize
         elif newSize < currentSize:
             cnt = currentSize - newSize
             for i in range(self.inactiveObjects):
                 if(cnt >= 1):
                     self.inactiveObjects.pop()
                     cnt -= 1
+                    size -= 1
         
         return self
 
