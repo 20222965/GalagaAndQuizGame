@@ -116,7 +116,7 @@ class Stage1(Stage):
             if(activeEnemy):
                 for enemy in activeEnemy:
                     if enemy.isOutsideScreen():
-                        enemy.heath = 0
+                        enemy.health = 1
                         enemy.hit()
             else:
                 print("Stage1 Clear")
@@ -184,7 +184,7 @@ class Stage2(Stage):
             if(activeEnemy):
                 for enemy in activeEnemy:
                     if enemy.isOutsideScreen():
-                        enemy.heath = 0
+                        enemy.health = 1
                         enemy.hit()
             else:
                 print("Stage2 Clear")
@@ -241,7 +241,7 @@ class Stage3(Stage):
             if(activeEnemy):
                 for enemy in activeEnemy:
                     if enemy.isOutsideScreen():
-                        enemy.heath = 0
+                        enemy.health = 1
                         enemy.hit()
             else:
                 print("Stage3 Clear")
@@ -306,7 +306,7 @@ class Stage4(Stage):
             if(activeEnemy):
                 for enemy in activeEnemy:
                     if enemy.isOutsideScreen():
-                        enemy.heath = 0
+                        enemy.health = 1
                         enemy.hit()
             else:
                 print("Stage4 Clear")
@@ -380,7 +380,7 @@ class Stage5(Stage):
             if(activeEnemy):
                 for enemy in activeEnemy:
                     if enemy.isOutsideScreen():
-                        enemy.heath = 0
+                        enemy.health = 1
                         enemy.hit()
             else:
                 print("Stage5 Clear")
