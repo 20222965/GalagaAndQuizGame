@@ -38,7 +38,7 @@ class SpriteInfo:
     
     #이미지 화면에 그림
     def render(self, screen : pygame.Surface):
-            screen.blit(self.image, tuple(self.position))
+            screen.blit(self.image, self.position)
 
     #개체 복사용 설정
     def __deepcopy__(self, memo):
@@ -56,6 +56,12 @@ img_enemys = [SpriteInfo(pygame.image.load(img_enemy).convert_alpha()) for img_e
 img_bullets = glob.glob(os.path.join(imageFolder, "bullet*.png"))
 img_bullets = [SpriteInfo(pygame.image.load(img_bullet).convert_alpha()) for img_bullet in img_bullets]
 
+
+img_life = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"life.png")).convert_alpha())
+img_shield = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"shield.png")).convert_alpha())
+
+
+img_playerShield = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"playerShield.png")).convert_alpha())
 
 #gif 재생 부분
 import imageio

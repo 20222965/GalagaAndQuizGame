@@ -50,7 +50,6 @@ class Bullet(GameObject):
         
     def hit(self):
         self.active = False
-        print("Bullet Hit!", self)
         
     def __rotateSprite(self):
         if(not self.canRotate):

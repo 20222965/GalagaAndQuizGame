@@ -1,6 +1,9 @@
 from .Object import *
 from .Bullet import *
+from .Item import *
 from data.Pattern import *
+
+import random
 
 #적 클래스
 class Enemy(GameObject):
@@ -20,6 +23,11 @@ class Enemy(GameObject):
         self.bulletManagers = [self.bulletManager , self.bullet2Manager, self.bullet3Manager]
         
         self.active = active
+        self.score = 0
+        
+        self.dropTable = {ItemLife() : 0.1,
+                          ItemShield() : 0.2,
+                          None : 1 - ( 0.1 + 0.2 )}
         
     #매 프레임 업데이트 함수
     def update(self, deltaTime):
@@ -48,21 +56,27 @@ class Enemy(GameObject):
 
     #충돌 했을 때
     def hit(self):
-        print("Enemy Hit!", self)
         self.health -= 1
+        print("Enemy Hit!",self.health, self.getCenterPos(), self)
         #체력이 없으면, 비활성 상태로 변환
         if(self.health <= 0):
+            player.score += 20 #몹이 죽으면 20점 증가
             self.active = False
             #테스트용 print
             print("Enemy Died", self)
             #gif 현재 위치에 재생
             gif_Died.addDied(self.getCenterPos())
             
+            randomItem = random.choices(list(self.dropTable.keys()), list(self.dropTable.values()))[0]
+            if randomItem:
+                spawnedItem = randomItem.clone()
+                spawnedItem.spawn(self.getCenterPos())
+            
     #이미지 갱신
     def render(self, screen):
-        super().render(screen)
         for bulletManager in self.bulletManagers:
            bulletManager.render(screen)
+        super().render(screen)
 
     #패턴 설정
     def setPatterns(self, patterns):

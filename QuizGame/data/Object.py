@@ -157,6 +157,9 @@ class ObjectManager:
         if obj in self.activeObjects:   #입력받은 개체가 활성 개체 리스트에 있으면
             # 활성 개체를 비활성 상태로 변경
             obj.active = False
+            obj.setCenterPos(-500,-500)
+            obj.acceleration = 0
+            obj.vector = [0, 0]
             self.activeObjects.remove(obj)
             self.inactiveObjects.append(obj)
             

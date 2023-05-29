@@ -98,7 +98,7 @@ class Quiz:
             try:
                 self.loadQuiz(filePath)
             except Exception as e:
-                print(f"로드 실패한 파일 : {folderPath}, Error : {str(e)}")
+                print(f"로드 실패한 파일 : {filePath}, Error : {str(e)}")
                 continue
 
     def loadQuiz(self, file : str):                 #json 파일에서 퀴즈를 가져온다.
