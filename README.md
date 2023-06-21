@@ -4,5 +4,5 @@
 # python 3.8~
 # pip install pygame imageio
 
-# Game Start : main.py
+# Game Start : main.pyw
 # Quiz Edit : QuizEditor.py
