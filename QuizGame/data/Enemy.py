@@ -17,17 +17,13 @@ class Enemy(GameObject):
         #공격 쿨타임
         self.attackTimer = attackTimer
         #불릿들 관리
-        self.bulletManager = BulletManager(bullet1, 5)
-        self.bullet2Manager = BulletManager(bullet2, 5)
-        self.bullet3Manager = BulletManager(bullet3, 5)
-        self.bulletManagers = [self.bulletManager , self.bullet2Manager, self.bullet3Manager]
-        
+        self.bulletManagers = [BulletManager(bullet, 0) for bullet in bullets]
         self.active = active
         self.score = 0
         
-        self.dropTable = {ItemLife() : 0.1,
-                          ItemShield() : 0.2,
-                          None : 1 - ( 0.1 + 0.2 )}
+        self.dropTable = {ItemLife() : 0.15,
+                          ItemShield() : 0.3,
+                          None : 1 - ( 0.15 + 0.3 )}
         
     #매 프레임 업데이트 함수
     def update(self, deltaTime):
@@ -77,7 +73,14 @@ class Enemy(GameObject):
         for bulletManager in self.bulletManagers:
            bulletManager.render(screen)
         super().render(screen)
-
+    def setHealth(self, health):
+        self.health = health
+        return self
+    def setDropTable(self, life = 0.15, shield = 0.3):
+        self.dropTable = {ItemLife() : life,
+                          ItemShield() : shield,
+                          None : 1 - ( life + shield )}
+        return self
     #패턴 설정
     def setPatterns(self, patterns):
         self.patternManager.setPattern(patterns)
@@ -89,6 +92,7 @@ class Enemy(GameObject):
     #attackTimer 변경
     def setAttackTimer(self, attackTimer):
         self.attackTimer = attackTimer
+        return self
         
 class EnemyManager(ObjectManager):  #그냥 자동완성안되서 넣음. 그 외 ObjectManager와는 현재 차이 없음.
     def __init__(self, gameEnemyInstance: Enemy, size: int = 10) -> None:
@@ -97,5 +101,6 @@ class EnemyManager(ObjectManager):  #그냥 자동완성안되서 넣음. 그 �
         return super().getObject()
     
 
-enemy1 = Enemy(img_enemys[0], Patterns.pattern01(), health=6)
-enemy2 = Enemy(img_enemys[1], Patterns.pattern01(), health=3)
+enemy1 = Enemy(img_enemys[0], Patterns.pattern01(), health=2)
+enemy2 = Enemy(img_enemys[1], Patterns.pattern01(), health=2)
+enemy3 = Enemy(img_enemys[2], [A_Normal(), A_Xrotate()], health=4)

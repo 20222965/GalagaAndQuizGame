@@ -1,6 +1,5 @@
-import pygame
 import glob
-import os
+import imageio
 from .Timer import *
 from .GameSetting import *
 
@@ -64,7 +63,6 @@ img_shield = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"shield.png")
 img_playerShield = SpriteInfo(pygame.image.load(os.path.join(imageFolder,"playerShield.png")).convert_alpha())
 
 #gif 재생 부분
-import imageio
 class Gif_Died:
     def __init__(self):
         self.diedPosAndTime = []

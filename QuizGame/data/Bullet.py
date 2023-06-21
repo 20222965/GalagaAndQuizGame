@@ -1,4 +1,3 @@
-import math
 from .Object import *
 
 #불릿
@@ -79,3 +78,6 @@ bullet1 = Bullet(img_bullets[0])
 bullet2 = Bullet(img_bullets[1])
 bullet3 = Bullet(img_bullets[2])
 bullet4 = Bullet(img_bullets[3])
+bullets = [Bullet(img_bullet) for img_bullet in img_bullets]
+bullets[3].canRotate = False
+bullets[4].canRotate = False
